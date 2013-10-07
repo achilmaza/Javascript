@@ -1,0 +1,179 @@
+<!--
+     Angie Chilmaza
+     SVA Javascript Fall 2013
+     Project: Rock/Paper/Scissors
+
+  -->
+
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>target</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<meta name="author" content="The Chopping Block, Inc." />
+	<meta name="geo.country" content="US" />
+	<meta name="dc.language" content="en" />
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	
+	<style type="text/css" media="screen">		
+		/*local styles if any (quick tests and local only overrides)*/
+		
+		* {
+		   padding:0;
+		   margin:0;
+			
+		}
+		
+		body{
+			font-family: georgia, serif;	
+		}
+		
+		.wrap{
+		   margin: 30px 0 0 50px;
+		}
+		
+		h1 {
+			font-family: helvetica, sans-serif;	
+			color: #06F;
+		}
+
+		.red{
+			background:red;
+		}
+
+		ul {
+
+			list-style: none;
+		}
+
+		button{
+
+		   width: 100px;
+		   height:25px;
+		   text-transform: uppercase;
+		}
+
+	</style>
+</head>
+<body>
+
+	<div class="wrap" >
+		
+		<ul> 
+			<li> Rock defeats (breaks) scissors </li>
+			<li> Scissors defeats (cuts) paper </li>
+			<li> Paper defetas (covers) rock </li>
+			<li> Click on squares below to make your selection. </li>
+		</ul>
+		<br>
+
+	    <div id="game">
+       		<img src="http://placehold.it/200x200/303&text=R">
+       		<img src="http://placehold.it/200x200/305&text=P">
+       		<img src="http://placehold.it/200x200/309&text=S">
+       	</div>
+       	<button id="reset"> reset </button>
+
+
+       <br>
+       <br>
+
+       <div id="selections">
+	    </div>
+
+       <div id="msg" > </div>    
+																
+	</div>
+	<script type="text/javascript" charset="utf-8">
+		
+		
+	    var msg = document.querySelector("#msg");	 
+	    var els = document.querySelectorAll("#game img");
+	    var selections = document.querySelector("#selections");
+	    var reset = document.querySelector("#reset");
+	    var game  = document.querySelector("#game");
+
+	    var map = ["http://placehold.it/150x150/303&text=R",
+					"http://placehold.it/150x150/305&text=P",
+				    "http://placehold.it/150x150/309&text=S"];
+
+		var randomRange = function(min, max) {
+		  return (Math.round( Math.random() * (max - min) + min));
+	    };
+
+
+		reset.onclick = function() {
+
+			selections.innerHTML = "";
+			msg.innerHTML = "";
+		}
+
+		for (var i=0; i < els.length; i++) {
+		
+		    els[i].classList.add(i+1);
+
+		    els[i].onclick = function(event){
+				  console.dir(event);
+					  
+				  var clickedElement = event.target;   	  			
+	   	  		  compSelection = randomRange(1, 3);
+
+
+	   	  		  selections.innerHTML = "<img src=' " + map[parseInt(clickedElement.className)-1] + " '>" +
+	   	  		  	                     "<img src=' " + map[compSelection-1] + " '>";
+
+
+	   	  		  if(clickedElement.className == compSelection){
+	   	  		  	msg.innerHTML = "It's a tie";
+	   	  		  }
+	   	  		  else if((clickedElement.className == "1" && compSelection == 2) ||
+	   	  		  		  (clickedElement.className == "2" && compSelection == 1)) {
+	   	  		  	msg.innerHTML = "Paper defeats rock."; 
+
+	   	  		  	if(clickedElement.className == "2")
+	   	  		  		msg.innerHTML += " You win."
+	   	  		  	else
+	   	  		  		msg.innerHTML += " Computer wins.";
+
+	   	  		  }
+	              else if((clickedElement.className == "2" && compSelection == 3) ||
+	                         (clickedElement.className == "3" && compSelection == 2)){
+	               	msg.innerHTML = "Scissors defeats paper.";
+	                	
+	                if(clickedElement.className == "3")
+	   	  		  		msg.innerHTML += " You win."
+	   	  		  	else
+	   	  		  		msg.innerHTML += " Computer wins.";
+
+	              }
+	              else if((clickedElement.className == "1" && compSelection == 3) ||
+	                         (clickedElement.className == "3" && compSelection == 1)){
+	                msg.innerHTML = "Rock defeats scissors.";
+	   	  		
+	   	  			if(clickedElement.className == "1")
+	   	  		  		msg.innerHTML += " You win."
+	   	  		  	else
+	   	  		  		msg.innerHTML += " Computer wins.";
+
+	   	  		  }
+
+
+	   	  		  
+
+			 };
+	    }
+		
+
+
+		
+		
+	</script>
+	
+</body>
+</html>
+
