@@ -1,0 +1,235 @@
+<!--
+     Angie Chilmaza
+     SVA Javascript Fall 2013
+     Project: Multiple Todo Lists with Jquery 
+
+  -->
+
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>target</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<meta name="author" content="The Chopping Block, Inc." />
+	<meta name="geo.country" content="US" />
+	<meta name="dc.language" content="en" />
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	
+	<style type="text/css" media="screen">		
+		/*local styles if any (quick tests and local only overrides)*/
+		
+		* {
+		   padding:0;
+		   margin:0;
+			
+		}
+		
+		body{
+			font-family: georgia, serif;	
+		}
+		
+		.wrap{
+		   margin: 30px 0 0 50px;
+		}
+		
+		h1 {
+			font-family: helvetica, sans-serif;	
+			color: #06F;
+		}
+		
+		.completed{
+			text-decoration: line-through;
+		}
+		
+		.addTaskButton {
+		   /*border-radius: 3px;*/	
+		   width: 100px;
+		   height:23px;
+		   text-transform: uppercase;
+		}
+		
+		.taskInput {
+			height:18px;
+			width:200px;
+		}
+		
+		.taskList li{
+			list-style: none;
+			margin-bottom: 3px;
+		}
+		
+		.taskList .selected{
+			list-style: disc;
+		}
+
+		div .focus{
+		}
+		
+		div.list {
+
+			float:left;
+			margin:30px 80px 0 0;
+		}
+
+		.clearfix:after {
+            content: " ";
+            display:block;
+            height:0;
+            clear:both;
+        }
+
+
+	</style>
+</head>
+<body>
+
+	<div class="wrap clearfix" >
+		
+        <div class="list"> 
+        	<h1>To Do List </h1>
+        	<br>
+	        <input type="text" value=" " class="taskInput">
+	        <button class="addTaskButton"> Add Task </button>
+	        
+	        <br>
+	        <br>
+	        
+	        <ul class="taskList">
+	           <li class="selected"> Buy milk </li>
+	        </ul>
+        </div>
+
+        <div class="list"> 
+        	<h1>To Do List </h1>
+        	<br>
+	        <input type="text" value=" " class="taskInput">
+	        <button class="addTaskButton"> Add Task </button>
+	        
+	        <br>
+	        <br>
+	        
+	        <ul class="taskList">
+	           <li class="selected"> Buy milk </li>
+	        </ul>
+        </div>
+																
+	</div>
+
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		
+
+	    /*Hitting the enter key on a button after tabbing on it
+	      triggers the keyup and click events ?*/
+
+	    var addTaskHandler = function (event) {
+
+	    	var taskList   = $(event.target).parent().children(".taskList");
+	    	var inputField = $(event.target).parent().children(".taskInput");
+	    	var input      = inputField.val();
+	    	
+			if(input!==" "){
+			  $("<li></li>").html(input).click(markCompletedHandler).appendTo(taskList);
+			  inputField.val(" ");
+			}
+
+			focusHandler(event);
+			
+		};
+
+		//Setup Event Handlers
+		$(".taskList li").each(function() {
+			$(this).click(markCompletedHandler);
+	     });
+
+		$(".addTaskButton").click(addTaskHandler);
+		$(".taskInput").focus(focusHandler);
+		$(".taskList").first().addClass("focus");
+
+
+		//Event Handlers 
+		$(document).keyup(function(event) {
+
+			var taskList   = $(".focus").children(".taskList");
+	    	var inputField = $(".focus").children(".taskInput");
+	    	var input      = inputField.val();
+	    	var target     = $(event.target);
+
+
+			if(event.keyCode === 13){ //enter 
+
+				//Only do this if event is triggered by input field
+				if(inputField.val() !== "" && target.is(".taskInput")){
+					addTaskHandler(event);	
+				}
+			}
+
+			//Exclude input field from space bar toggle 
+			else if(event.keyCode === 32 && !target.is(".taskInput")){ //space bar 
+
+			   taskList.children(".selected").toggleClass("completed");
+			}
+
+			else if(event.keyCode == 38) { //key up 
+			   
+			   inputField.blur();
+			   var currentElement = taskList.children("li.selected");
+			   currentElement.removeClass("selected");
+
+			   if(currentElement.prev().length > 0 ){
+
+			   	  currentElement.prev().addClass("selected");
+			   }
+			   else{
+
+			   	  taskList.children().last().addClass("selected");
+			   }
+			  
+			}
+
+			else if(event.keyCode === 40){ //key down
+		
+			   inputField.blur();
+			   var currentElement = taskList.children("li.selected");
+			   currentElement.removeClass("selected");
+
+			   if(currentElement.next().length > 0 ){
+
+			   	  currentElement.next().addClass("selected");
+			   }
+			   else{
+
+			   	  taskList.children().first().addClass("selected");
+			   }
+			}
+			
+		});
+		
+		
+		//Mark list item completed
+		function markCompletedHandler(event){
+
+			focusHandler(event);
+			$(event.target).toggleClass("completed");
+		}
+
+		//Focus on current list 
+		function focusHandler(event){
+			$(".focus").removeClass("focus");
+			$(event.target).parents("div.list").addClass("focus");
+
+		}
+	
+		
+	</script>
+	
+</body>
+</html>
+
+
