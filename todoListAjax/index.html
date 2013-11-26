@@ -1,0 +1,271 @@
+<!--
+     Angie Chilmaza
+     SVA Javascript Fall 2013
+     Project: Todo List with Ajax 
+     11/26/13
+
+  -->
+
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>target</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<meta name="author" content="The Chopping Block, Inc." />
+	<meta name="geo.country" content="US" />
+	<meta name="dc.language" content="en" />
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	
+	<style type="text/css" media="screen">		
+		/*local styles if any (quick tests and local only overrides)*/
+		
+		* {
+		   padding:0;
+		   margin:0;
+			
+		}
+		
+		body{
+			font-family: georgia, serif;	
+		}
+		
+		.wrap{
+		   margin: 30px 0 0 50px;
+		}
+		
+		h1 {
+			font-family: helvetica, sans-serif;	
+			color: #06F;
+		}
+		
+		.completed{
+			text-decoration: line-through;
+		}
+		
+		#addTaskButton {
+		   /*border-radius: 3px;*/	
+		   width: 100px;
+		   height:23px;
+		   text-transform: uppercase;
+		}
+		
+		#taskInput {
+			height:18px;
+			width:200px;
+		}
+		
+		#taskList li{
+			list-style: none;
+			margin-bottom: 3px;
+		}
+		
+		#taskList .selected{
+			list-style: disc;
+		}
+		
+	</style>
+</head>
+<body>
+
+	<div class="wrap" >
+		
+        <h1>Todo List with Ajax </h1>
+        <br>
+        
+        <input type="text" value=" " id="taskInput">
+        <button id="addTaskButton"> Add Task </button>
+        
+        <br>
+        <br>
+        
+        <ul id="taskList">
+           
+        </ul>
+																
+	</div>
+
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		
+
+	    /*Hitting the enter key on a button after tabbing on it
+	      triggers the keyup and click events ?*/
+
+
+		var addTaskButton = $("#addTaskButton");
+		var inputField    = $("#taskInput");
+		var taskList      = $("#taskList");
+
+
+		addTaskButton.click(addTaskHandler);
+
+		//-------------- GET ---------------
+		var options = {
+			username: "angiec",
+			task: "taskname"
+		}
+
+		$.ajax({			
+			url: "http://sva.designedbyscience.com/tasks",
+			type: "GET",
+			data: options  //automatically makes the query string username=eric
+			
+		}).done(function(data){
+			//Checking to see the type of the response
+			
+			//It was just a string, so we parse it as a JSON object
+			var formatted_data = $.parseJSON(data);		
+
+			for (var i=0; i < formatted_data.length; i++) {
+				var new_task = $("<li>");				
+				
+				new_task.text(formatted_data[i].task_text);
+				new_task.attr("data-task-id", formatted_data[i].id);
+				if(formatted_data[i].completed){
+					new_task.addClass("completed");
+				}
+				new_task.appendTo(taskList);
+				new_task.click(markCompleteHandler);
+			};
+
+
+		});
+
+
+	    function addTaskHandler(event){
+
+	    	var input = inputField.val();
+
+			if(input!==" "){
+			  var listItem = $("<li>").html(input).click(markCompleteHandler).appendTo(taskList);
+			  
+			  //call ajax to write to db 
+			  postTask(input, listItem); 
+			  inputField.val(" ");
+			}
+			
+		};
+
+		//------------ KEYBOARD EVENTS ------------
+		$(document).keyup(function(event) {
+
+			if(event.keyCode === 13){ //enter 
+
+				//Only do this if event is triggered by input field
+				if(inputField.val() !== "" && $(event.target).is("#taskInput")){
+					addTaskHandler(event);	
+				}
+			}
+
+			//Exclude input field from space bar toggle 
+			else if(event.keyCode === 32 && !$(event.target).is("#taskInput")){ //space bar 
+			
+				markComplete($(".selected"));
+			}
+
+			else if(event.keyCode == 38) { //key up 
+			   
+			   inputField.blur();
+			   var currentElement = $("li.selected");
+			   currentElement.removeClass("selected");
+
+			   if(currentElement.prev().length > 0 ){
+
+			   	  currentElement.prev().addClass("selected");
+			   }
+			   else{
+
+			   	  $("#taskList li").last().addClass("selected");
+			   }
+			  
+			}
+
+			else if(event.keyCode === 40){ //key down
+		
+			   inputField.blur();
+			   var currentElement = $("li.selected");
+			   currentElement.removeClass("selected");
+
+			   if(currentElement.next().length > 0 ){
+
+			   	  currentElement.next().addClass("selected");
+			   }
+			   else{
+
+			   	  $("#taskList li").first().addClass("selected");
+			   }
+			}
+			
+		});
+		
+		
+		//----------------- POST -------------------
+		function markCompleteHandler(event){
+
+			markComplete($(event.target));
+		}
+
+		//mark complete 
+		function markComplete(listItem){
+
+			listItem.toggleClass("completed");
+
+			//console.log("markComplete: id= " + listItem.attr("data-task-id"));
+
+			var options = {
+				  username: "angiec",
+				  task: "taskname"
+			  }
+	  
+			  $.ajax({			
+				  url:  "http://sva.designedbyscience.com/task/" + listItem.attr("data-task-id"),
+				  type: "POST",
+				  data: options  //automatically makes the query string username=eric
+				  
+			  }).done(function(data){
+				
+				  var formatted_data = $.parseJSON(data);
+				 
+				  if(formatted_data.success){
+				  	 console.log("markComplete: task id = " + formatted_data.id + " updated");
+				  }
+			  });	
+		}
+
+		//create new list item
+		function postTask(taskName, listItem){
+				  var options = {
+				  username: "angiec",
+				  task: taskName
+			  }
+	  
+			  $.ajax({			
+				  url: "http://sva.designedbyscience.com/task",
+				  type: "POST",
+				  data: options  //automatically makes the query string username=eric
+				  
+			  }).done(function(data){
+				
+				  var formatted_data = $.parseJSON(data);
+				  console.log("postTask: " + formatted_data);
+
+				  if(formatted_data.success){
+				  	listItem.attr("data-task-id", formatted_data.id);
+				  }
+
+			  });	
+		}
+	
+		
+	</script>
+	
+</body>
+</html>
+
+
